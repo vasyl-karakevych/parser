@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import openpyxl
-import products
+from product import Product
 
 def open_surl(url):
     # Відправка запиту до сторінки і отримання її вмісту
@@ -24,21 +24,45 @@ def open_surl(url):
             product_name = name.text.strip()
             product_price = price.text.strip()
 
-            print(f'Назва: {product_name}')
-            print(f'Ціна: {product_price}')
-            print('-' * 50)
+            # print(f'Назва: {product_name}')
+            # print(f'Ціна: {product_price}')
+            # print('-' * 50)
 
             cena = ''.join(product_price[0:-3].split())
-            print(cena)
+            # print(cena)
             sheet.cell(row=row, column=1, value=product_name)
             sheet.cell(row=row, column=2, value=product_price)
+
+            products = Product(product_name, product_price)
+            list_products.append(products)
 
         workbook.save('komputronik.xlsx')
     else:
         print(f'Помилка отримання сторінки. Статус-код: {response.status_code}')
 # URL сторінки, яку потрібно спарсити
 
+def fiter_list(list_products):
+    # Створюємо словник для відстеження унікальних імен
+    unique_names = {}
+
+    # Фільтруємо список, залишаючи тільки об'єкти з унікальними іменами
+    filtered_products = []
+
+    for product in list_products:
+        if product.name not in unique_names:
+            unique_names[product.name] = True
+            filtered_products.append(product)
+    list_products = filtered_products
+    return list_products
+
+
+list_products = []
 for i in range(1,10):
     url = f'https://www.komputronik.pl/search-filter/1099/geforce-rtx-3060?a%5B507%5D%5B%5D=130691&filter=1&showBuyActiveOnly=0&p={i}'
     open_surl(url)
     print('*' * 70)
+
+list_products = fiter_list(list_products)
+
+print(list_products)
+print(f'count= {len(list_products)}')

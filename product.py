@@ -4,6 +4,6 @@ class Product:
         self.price  = price
 
     def __repr__(self) -> str:
-        print(self.name)
-        print(self.price)
+        return(f'NAME= {self.name}******* PRICE= {self.price}\n')
+
 
