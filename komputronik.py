@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import openpyxl
 from product import Product
+import os
 
 def Open_url(url):
     # Відправка запиту до сторінки і отримання її вмісту
@@ -15,20 +16,23 @@ def Open_url(url):
         # Знаходимо всі елементи з назвою товару і ціною
         product_names = soup.find_all('h2', class_='font-headline text-lg font-bold leading-6 line-clamp-3 md:text-xl md:leading-8')
         prices = soup.find_all('div', class_='text-3xl font-bold leading-8')
+        p_available = soup.find_all('div', class_='leading-tight')
         # font-semibold
 
         # Виводимо дані на екран
-        for row, (name, price) in enumerate(zip(product_names, prices), start=1):
+        for row, (name, price, p_available) in enumerate(zip(product_names, prices, p_available), start=1):
             product_name = name.text.strip()
             product_price = price.text.strip()
+            product_available = p_available.text.strip()
 
+            if product_available == "": continue
+            # print(product_available)
             product_price = ''.join(product_price[0:-3].split())
 
         # Видаляємо якщо пише у назві OUTLET   
-            if product_name[-7:-1] == "Outlet": 
-                continue
+            if product_name[-7:-1] == "Outlet": continue
 
-            products = Product(product_name, int(product_price))
+            products = Product(product_name, product_price)
             list_products.append(products)
 
         
@@ -49,15 +53,32 @@ def Fiter_List(list_products):
             filtered_products.append(product)
     list_products = filtered_products
     return list_products
+
 def Write_Exel(list_product):
+    RemoveExcelFile("komputronik.wlsx")
+
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     
     for row, (product) in enumerate(list_products, start=1):
-        sheet.cell(row=row, column=1, value=product.getName())
-        sheet.cell(row=row, column=2, value=product.getPrice())
+        sheet.cell(row=row, column=1, value=row)
+        sheet.cell(row=row, column=2, value=product.getName())
+        sheet.cell(row=row, column=3, value='=')
+        # sheet.cell(row=row, column=2, value=product.getPrice())
+        sheet.cell(row=row, column=4, value=product.getPriceWithDelivery())
+        sheet.cell(row=row, column=5, value='грн.')
     
     workbook.save('komputronik.xlsx')
+
+def RemoveExcelFile(file_name):
+    file_name = "komputronik.xlsx"  
+
+    if os.path.exists(file_name):
+        os.remove(file_name)
+        print(f"Файл {file_name} було видалено.")
+    else:
+        print(f"Файл {file_name} не існує.")
+   
 def Sort(list_products):
     for i in range(0, len(list_products)-1):
         for j in range(i, len(list_products)):
@@ -73,15 +94,15 @@ def Sort(list_products):
     return list_products
 
 list_products = []
-for i in range(1,4):
-    url = f'https://www.komputronik.pl/search-filter/1099/geforce-rtx-3060?a%5B507%5D%5B%5D=130691&filter=1&showBuyActiveOnly=0&p={i}'
+for i in range(1,50):
+    url = f'https://www.komputronik.pl/category/1099/karty-graficzne.html?showBuyActiveOnly=0&p={i}'
     Open_url(url)
-    print('*' * i)
+    print(f'Parcing page {i}')
 
 list_products = Fiter_List(list_products)
 Write_Exel(list_products)
 
-print(list_products)
+# print(list_products)
 Sort(list_products)
-print(list_products)
-# print(f'count= {len(list_products)}')
+# print(list_products)
+print(f'Scan and wrote= {len(list_products)} elements')
