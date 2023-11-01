@@ -24,14 +24,14 @@ def open_surl(url):
             product_name = name.text.strip()
             product_price = price.text.strip()
 
-            # print(f'Назва: {product_name}')
-            # print(f'Ціна: {product_price}')
-            # print('-' * 50)
+            product_price = ''.join(product_price[0:-3].split())
 
-            cena = ''.join(product_price[0:-3].split())
-            # print(cena)
             sheet.cell(row=row, column=1, value=product_name)
             sheet.cell(row=row, column=2, value=product_price)
+
+         # Видаляємо якщо пише у назві OUTLET   
+            if product_name[-7:-1] == "Outlet": 
+                continue
 
             products = Product(product_name, product_price)
             list_products.append(products)
@@ -53,14 +53,20 @@ def fiter_list(list_products):
             unique_names[product.name] = True
             filtered_products.append(product)
     list_products = filtered_products
+
+    # Фільтрумемо ті які містять в назві outlet
+    # for product in list_products:
+    #     if product.name.find('oferta Outlet'):
+    #         print('outlet')
+
     return list_products
 
 
 list_products = []
-for i in range(1,10):
+for i in range(1,4):
     url = f'https://www.komputronik.pl/search-filter/1099/geforce-rtx-3060?a%5B507%5D%5B%5D=130691&filter=1&showBuyActiveOnly=0&p={i}'
     open_surl(url)
-    print('*' * 70)
+    print('*' * i)
 
 list_products = fiter_list(list_products)
 
