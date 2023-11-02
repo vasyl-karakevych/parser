@@ -4,7 +4,7 @@ import openpyxl
 from product import Product
 import os
 
-def Open_url(url):
+def Open_url(list_products, url):
     # Відправка запиту до сторінки і отримання її вмісту
     response = requests.get(url)
 
@@ -54,7 +54,7 @@ def Fiter_List(list_products):
     list_products = filtered_products
     return list_products
 
-def Write_Exel(list_product):
+def Write_Exel(list_products):
     RemoveExcelFile("komputronik.wlsx")
 
     workbook = openpyxl.Workbook()
@@ -79,20 +79,28 @@ def RemoveExcelFile(file_name):
     else:
         print(f"Файл {file_name} не існує.")
    
-def parcing_url(list_products, url_list):
-    pass
+def parcing_url(url_list):
+    list_products = []
+    for url_address in url_list:
+        for i in range(1,170):
+            url = f'{url_address}{i}'
+            print(f'Parcing {url_address}{i}')
+            Open_url(list_products, url)
+        
+    list_products = Fiter_List(list_products)
+    list_products = sorted(list_products, key=lambda x: x.price)
+    Write_Exel(list_products)
+    print(f'Scan and wrote= {len(list_products)} elements')
+    print()
 
-list_products = []
+url_list = []
+print('parcing Grafik cards')
+url_list.append('https://www.komputronik.pl/category/1099/karty-graficzne.html?showBuyActiveOnly=0&p=')
+print('Parcing laptops')
+url_list.append('https://www.komputronik.pl/category/5022/laptopy.html?showBuyActiveOnly=0&p=')
 
-for i in range(1,40):
-    url = f'https://www.komputronik.pl/category/1099/karty-graficzne.html?showBuyActiveOnly=0&p={i}'
-    Open_url(url)
-    print(f'Parcing page {i}')
 
-list_products = Fiter_List(list_products)
-list_products = sorted(list_products, key=lambda x: x.price)
 
-Write_Exel(list_products)
-
+parcing_url(url_list)
 # print(list_products)
-print(f'Scan and wrote= {len(list_products)} elements')
+
