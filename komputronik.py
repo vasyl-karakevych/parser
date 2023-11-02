@@ -79,30 +79,20 @@ def RemoveExcelFile(file_name):
     else:
         print(f"Файл {file_name} не існує.")
    
-def Sort(list_products):
-    for i in range(0, len(list_products)-1):
-        for j in range(i, len(list_products)):
-            if list_products[i].getPrice() >  list_products[j].getPrice():
-                tmp_name = list_products[i].getName()
-                tmp_price = list_products[i].getPrice()
-                list_products[i].setName(list_products[j].getName())
-                list_products[i].setPrice(list_products[j].getPrice())
-                list_products[j].setName(tmp_name)
-                list_products[j].setPrice(tmp_price)
-                if i > 1:
-                    i = i - 2
-    return list_products
+def parcing_url(list_products, url_list):
+    pass
 
 list_products = []
-for i in range(1,50):
+
+for i in range(1,40):
     url = f'https://www.komputronik.pl/category/1099/karty-graficzne.html?showBuyActiveOnly=0&p={i}'
     Open_url(url)
     print(f'Parcing page {i}')
 
 list_products = Fiter_List(list_products)
+list_products = sorted(list_products, key=lambda x: x.price)
+
 Write_Exel(list_products)
 
-# print(list_products)
-Sort(list_products)
 # print(list_products)
 print(f'Scan and wrote= {len(list_products)} elements')
