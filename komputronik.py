@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import openpyxl
 from product import Product
 import os
+from sheet import Sheet
 
 def Open_url(list_products, url):
     # Відправка запиту до сторінки і отримання її вмісту
@@ -54,12 +55,26 @@ def Fiter_List(list_products):
     list_products = filtered_products
     return list_products
 
-def Write_Exel(list_products):
-    RemoveExcelFile("komputronik.wlsx")
+def Write_Exel(list_products, type):
+    # RemoveExcelFile("komputronik.wlsx")
 
-    workbook = openpyxl.Workbook()
-    sheet = workbook.active
-    
+    # workbook = openpyxl.Workbook()
+    # sheet = workbook.active
+    # Створити нову вкладку (лист) і назвати її
+    # new_sheet = workbook.create_sheet(type)
+    workbook = openpyxl.load_workbook('komputronik.xlsx')
+    sheet = workbook[type]
+
+    # Встановити ширину стовпця (наприклад, стовпця A) в пікселях
+    sheet.column_dimensions['B'].width = 70  
+
+    # Clear
+    maxColumn = int(sheet.max_column - 5)
+    maxRow = int(sheet.max_row + 1)
+    for i in range(1, maxColumn):
+        for j in range(1, maxRow):
+            sheet.cell(column=i, row=j).value = None 
+
     for row, (product) in enumerate(list_products, start=1):
         sheet.cell(row=row, column=1, value=row)
         sheet.cell(row=row, column=2, value=product.getName())
@@ -67,7 +82,7 @@ def Write_Exel(list_products):
         # sheet.cell(row=row, column=2, value=product.getPrice())
         sheet.cell(row=row, column=4, value=product.getPriceWithDelivery())
         sheet.cell(row=row, column=5, value='грн.')
-    
+        
     workbook.save('komputronik.xlsx')
 
 def RemoveExcelFile(file_name):
@@ -79,28 +94,26 @@ def RemoveExcelFile(file_name):
     else:
         print(f"Файл {file_name} не існує.")
    
-def parcing_url(url_list):
+def parcing_url(url_, type, count):
     list_products = []
-    for url_address in url_list:
-        for i in range(1,170):
-            url = f'{url_address}{i}'
-            print(f'Parcing {url_address}{i}')
-            Open_url(list_products, url)
-        
+    for i in range(1,count):
+        url = f'{url_}{i}'
+        print(f'Parcing {url}')
+        Open_url(list_products, url)
     list_products = Fiter_List(list_products)
     list_products = sorted(list_products, key=lambda x: x.price)
-    Write_Exel(list_products)
+    Write_Exel(list_products, type)
     print(f'Scan and wrote= {len(list_products)} elements')
-    print()
 
-url_list = []
+
 print('parcing Grafik cards')
-url_list.append('https://www.komputronik.pl/category/1099/karty-graficzne.html?showBuyActiveOnly=0&p=')
+parcing_url('https://www.komputronik.pl/category/1099/karty-graficzne.html?showBuyActiveOnly=0&p=', 'Karty', 40)
+
 print('Parcing laptops')
-url_list.append('https://www.komputronik.pl/category/5022/laptopy.html?showBuyActiveOnly=0&p=')
+parcing_url('https://www.komputronik.pl/category/5022/laptopy.html?showBuyActiveOnly=0&p=', 'Laptops', 70)
 
 
 
-parcing_url(url_list)
+# parcing_url(url_list)
 # print(list_products)
 
