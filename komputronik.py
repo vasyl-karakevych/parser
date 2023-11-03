@@ -68,19 +68,21 @@ def Write_Exel(list_products, type):
     # Встановити ширину стовпця (наприклад, стовпця A) в пікселях
     sheet.column_dimensions['B'].width = 70  
 
-    # Clear
-    maxColumn = int(sheet.max_column - 5)
-    maxRow = int(sheet.max_row + 1)
-    for i in range(1, maxColumn):
-        for j in range(1, maxRow):
-            sheet.cell(column=i, row=j).value = None 
+    # Очистіть всі дані на аркуші
+    for row in sheet:
+        for cell in row:
+            cell.value = None
 
     for row, (product) in enumerate(list_products, start=1):
         sheet.cell(row=row, column=1, value=row)
         sheet.cell(row=row, column=2, value=product.getName())
         sheet.cell(row=row, column=3, value='=')
         # sheet.cell(row=row, column=2, value=product.getPrice())
-        sheet.cell(row=row, column=4, value=product.getPriceWithDelivery())
+        if type == 'Laptops': 
+            sheet.cell(row=row, column=4, value=product.getPriceWithDelivery() + 400)
+        else:
+            sheet.cell(row=row, column=4, value=product.getPriceWithDelivery())
+
         sheet.cell(row=row, column=5, value='грн.')
         
     workbook.save('komputronik.xlsx')
